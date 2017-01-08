@@ -228,9 +228,9 @@ func (s *Session) maybeResetTimer() {
 	if !s.delayedAckOriginTime.IsZero() {
 		nextDeadline = utils.MinTime(nextDeadline, s.delayedAckOriginTime.Add(protocol.AckSendDelay))
 	}
-	if rtoTime := s.sentPacketHandler.TimeOfFirstRTO(); !rtoTime.IsZero() {
-		nextDeadline = utils.MinTime(nextDeadline, rtoTime)
-	}
+	// if rtoTime := s.sentPacketHandler.TimeOfFirstRTO(); !rtoTime.IsZero() {
+	// 	nextDeadline = utils.MinTime(nextDeadline, rtoTime)
+	// }
 	if !s.cryptoSetup.HandshakeComplete() {
 		handshakeDeadline := s.sessionCreationTime.Add(protocol.MaxTimeForCryptoHandshake)
 		nextDeadline = utils.MinTime(nextDeadline, handshakeDeadline)
@@ -503,7 +503,7 @@ func (s *Session) sendPacket() error {
 		}
 
 		// Do this before checking the congestion, since we might de-congestionize here :)
-		s.sentPacketHandler.MaybeQueueRTOs()
+		// s.sentPacketHandler.MaybeQueueRTOs()
 
 		if !s.sentPacketHandler.SendingAllowed() {
 			return nil

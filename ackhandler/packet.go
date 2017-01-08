@@ -47,3 +47,17 @@ func (p *Packet) GetControlFramesForRetransmission() []frames.Frame {
 	}
 	return controlFrames
 }
+
+func (p *Packet) IsRetransmittable() bool {
+	for _, frame := range p.Frames {
+		switch frame.(type) {
+		case *frames.StreamFrame:
+			return true
+		case *frames.WindowUpdateFrame:
+			return true
+		case *frames.PingFrame:
+			return true
+		}
+	}
+	return false
+}

@@ -64,3 +64,5 @@ const MaxRetransmissionTime = 60 * time.Second
 
 // ClientHelloMinimumSize is the minimum size the server expects an inchoate CHLO to have.
 const ClientHelloMinimumSize = 1024
+
+const ReorderingThreshold = 3

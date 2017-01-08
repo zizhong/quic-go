@@ -14,7 +14,7 @@ type SentPacketHandler interface {
 
 	GetStopWaitingFrame(force bool) *frames.StopWaitingFrame
 
-	MaybeQueueRTOs()
+	// MaybeQueueRTOs()
 	DequeuePacketForRetransmission() (packet *Packet)
 
 	BytesInFlight() protocol.ByteCount
@@ -23,7 +23,7 @@ type SentPacketHandler interface {
 	SendingAllowed() bool
 	CheckForError() error
 
-	TimeOfFirstRTO() time.Time
+	// TimeOfFirstRTO() time.Time
 }
 
 // ReceivedPacketHandler handles ACKs needed to send for incoming packets
