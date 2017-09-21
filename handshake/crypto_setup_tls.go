@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"net"
 	"sync"
 
 	"github.com/bifurcation/mint"
@@ -24,19 +25,23 @@ type cryptoSetupTLS struct {
 	mintConf *mint.Config
 	conn     crypto.MintController
 
+	checkCookieCallback func(net.Addr, *Cookie) bool
+
 	nullAEAD crypto.AEAD
 	aead     crypto.AEAD
 
 	aeadChanged chan<- protocol.EncryptionLevel
 }
 
-// NewCryptoSetupTLS creates a new CryptoSetup instance for a server
+// NewCryptoSetupTLS creates a new CryptoSetup instance
 func NewCryptoSetupTLS(
 	hostname string, // only needed for the client
+	remoteAddr net.Addr,
 	perspective protocol.Perspective,
 	version protocol.VersionNumber,
 	tlsConfig *tls.Config,
 	cryptoStream io.ReadWriter,
+	checkCookie func(net.Addr, *Cookie) bool,
 	aeadChanged chan<- protocol.EncryptionLevel,
 ) (CryptoSetup, error) {
 	mintConf, err := tlsToMintConfig(tlsConfig, perspective)
@@ -44,11 +49,21 @@ func NewCryptoSetupTLS(
 		return nil, err
 	}
 	mintConf.ServerName = hostname
+	fc := &fakeConn{
+		ReadWriter: cryptoStream,
+		remoteAddr: remoteAddr,
+	}
 	var conn *mint.Conn
 	if perspective == protocol.PerspectiveServer {
-		conn = mint.Server(&fakeConn{cryptoStream}, mintConf)
+		var err error
+		mintConf.RequireCookie = true
+		mintConf.CookieHandler, err = newCookieHandler(checkCookie)
+		if err != nil {
+			return nil, err
+		}
+		conn = mint.Server(fc, mintConf)
 	} else {
-		conn = mint.Client(&fakeConn{cryptoStream}, mintConf)
+		conn = mint.Client(fc, mintConf)
 	}
 	return &cryptoSetupTLS{
 		perspective:   perspective,

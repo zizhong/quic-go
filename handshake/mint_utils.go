@@ -65,13 +65,15 @@ func (mc *mintController) ComputeExporter(label string, context []byte, keyLengt
 // so we wrap a stream such that implements a net.Conn
 type fakeConn struct {
 	io.ReadWriter
+
+	remoteAddr net.Addr
 }
 
 var _ net.Conn = &fakeConn{}
 
 func (c *fakeConn) Close() error                     { return nil }
 func (c *fakeConn) LocalAddr() net.Addr              { return nil }
-func (c *fakeConn) RemoteAddr() net.Addr             { return nil }
+func (c *fakeConn) RemoteAddr() net.Addr             { return c.remoteAddr }
 func (c *fakeConn) SetReadDeadline(time.Time) error  { return nil }
 func (c *fakeConn) SetWriteDeadline(time.Time) error { return nil }
 func (c *fakeConn) SetDeadline(time.Time) error      { return nil }

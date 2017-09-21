@@ -203,10 +203,12 @@ func (s *session) setup(
 		if s.version == protocol.VersionTLS {
 			s.cryptoSetup, err = handshake.NewCryptoSetupTLS(
 				"",
+				s.conn.RemoteAddr(),
 				s.perspective,
 				s.version,
 				tlsConf,
 				cryptoStream,
+				verifySourceAddr,
 				aeadChanged,
 			)
 		} else {
@@ -227,10 +229,12 @@ func (s *session) setup(
 		if s.version == protocol.VersionTLS {
 			s.cryptoSetup, err = handshake.NewCryptoSetupTLS(
 				hostname,
+				s.conn.RemoteAddr(),
 				s.perspective,
 				s.version,
 				tlsConf,
 				cryptoStream,
+				nil,
 				aeadChanged,
 			)
 		} else {
